@@ -1,0 +1,5 @@
+paramiko
+requests
+psycopg2-binary
+python-dotenv
+python-telegram-bot==13.7
