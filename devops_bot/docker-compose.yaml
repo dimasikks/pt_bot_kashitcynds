@@ -1,0 +1,62 @@
+version: '3'
+services:
+  bot:
+    restart: always
+    build: ./bot
+    image: bot_image
+    container_name: bot_container
+    env_file:
+      - .env
+    depends_on:
+      - db
+  db:
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    image: db_image
+    container_name: db_container
+    ports:
+      - ${DB_PORT}:5432
+    command: |
+      postgres
+      -c listen_addresses=*
+      -c wal_level=replica
+      -c hot_standby=on
+      -c max_connections=100
+      -c max_replication_slots=10
+      -c hot_standby_feedback=on
+      -c log_replication_commands=on
+    volumes:
+      - /var/log/postgresql:/var/log/postgresql
+    env_file:
+      - .env
+  db_repl:
+    restart: always
+    image: db_repl_image
+    container_name: db_repl_container
+    environment:
+      POSTGRES_USER: ${DB_REPL_USER}
+      POSTGRES_PASSWORD: ${DB_REPL_PASSWORD}
+    ports:
+      - ${DB_REPL_PORT}:5432
+    command: |
+      bash -c "
+      rm -rf /var/lib/postgresql/data/*
+      until PGPASSWORD=${DB_REPL_PASSWORD} pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=${DB_HOST} --username=${DB_REPL_USER};
+      do
+      echo 'Waiting for primary connect...'
+      sleep 5s
+      done
+      echo "Backup done, starting replica..."
+      chown -R postgres:postgres /var/lib/postgresql/data
+      chmod 700 /var/lib/postgresql/data
+      su postgres -c "exec /usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql/data"
+      "
+    env_file:
+      - .env
+    depends_on:
+      - db
