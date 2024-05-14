@@ -38,8 +38,8 @@ cursor = connection.cursor()
 
 TOKEN = os.getenv('TOKEN')
 
-count1 = 1
-count2 = 1
+count1 = 2
+count2 = 2
 # Подключаем логирование
 logging.basicConfig(
     filename='logfile.txt', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
