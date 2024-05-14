@@ -28,11 +28,11 @@ portDB=os.getenv('DB_PORT')
 databaseDB=os.getenv('DB_DATABASE')
 
 connection = psycopg2.connect(
-        user=userDB,
-        password=passwordDB,
-        host=hostDB,
-        port=portDB,
-        database=databaseDB
+        user="postgres",
+        password="Qq12345",
+        host="192.168.10.156",
+        port="5432",
+        database="base_1"
 )
 cursor = connection.cursor()
 
