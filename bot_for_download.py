@@ -90,7 +90,7 @@ def save_email(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in email:
-                cursor.execute("INSERT INTO email(id, email) VALUES ("+count1+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO email(id, email) VALUES ("+str(count1)+",'"+str(x)+"');")
             connection.commit()
             count1+=1
             update.message.reply_text("Добавление выполнено успешно!")
@@ -123,7 +123,7 @@ def save_phone_numbers(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in phoneNumberList:
-                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+count2+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+str(count2)+",'"+str(x)+"');")
             connection.commit()
             count2+=1
             update.message.reply_text("Добавление выполнено успешно!")
@@ -245,7 +245,7 @@ def get_repl_logs(update: Update, context):
 
 def get_emails(update: Update, context):
     try:
-        cursor.execute("SELECT * FROM email;")
+        cursor.execute("SELECT * FROM public.email;")
     except (Exception, Error) as error:
         update.message.reply_text("ERROR "+str(error))
     data = cursor.fetchall()
@@ -256,7 +256,7 @@ def get_emails(update: Update, context):
 
 def get_phone_numbers(update: Update, context):
     try:
-        cursor.execute("SELECT * FROM phone_number;")
+        cursor.execute("SELECT * FROM public.phone_number;")
     except (Exception, Error) as error:
         update.message.reply_text("ERROR "+str(error))
     data = cursor.fetchall()
