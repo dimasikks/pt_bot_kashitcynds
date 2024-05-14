@@ -1,1 +1,29 @@
-
+all:
+  vars:
+    DB_REPL_USER: repl_user
+    DB_REPL_PASSWORD: Qq12345
+    POSTGRES_VERSION: 15
+    DB_HOST: 192.168.10.156
+  hosts:
+    host01:
+      ansible_host: 192.168.10.156
+      ansible_user: root
+      ansible_ssh_password: dima2004
+      github_repo: https://github.com/dimasikks/pt_bot_kashitcynds.git
+      dir: /root/ansible
+      TOKEN: 
+      RM_HOST: 192.168.10.156
+      RM_PORT: 22
+      RM_USER: root
+      RM_PASSWORD: dima2004
+      DB_USER: postgres
+      DB_PASSWORD: Qq12345
+      DB_PORT: 5432
+      DB_DATABASE: base_1
+      DB_HOST: 192.168.10.156
+      DB_REPL_HOST: db_repl
+      DB_REPL_PORT: 5432
+    host02:
+      ansible_host: 192.168.10.157
+      ansible_user: root
+      ansible_ssh_password: dima2004
