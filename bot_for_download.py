@@ -234,7 +234,7 @@ def get_services(update: Update, context):
 
 def get_repl_logs(update: Update, context):
     connect_to_machine()
-    stdin, stdout, stderr = client.exec_command('cat /var/log/postgresql/postgresql-15.log | grep replication | head -10')
+    stdin, stdout, stderr = client.exec_command('cat /var/log/postgresql/postgresql-15-main.log | grep replication | head -10')
     update.message.reply_text(print_info(stdout,stderr))
 
 def get_emails(update: Update, context):
