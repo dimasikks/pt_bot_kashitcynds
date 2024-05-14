@@ -89,7 +89,7 @@ def save_email(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in email:
-                cursor.execute("INSERT INTO email(id, email) VALUES ("+count1+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO email(id, email) VALUES ("+str(count1)+",'"+str(x)+"');")
             connection.commit()
             count1+=1
             update.message.reply_text("Добавление выполнено успешно!")
@@ -121,7 +121,7 @@ def save_phone_numbers(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in phoneNumberList:
-                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+count2+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+str(count2)+",'"+str(x)+"');")
             connection.commit()
             count2+=1
             update.message.reply_text("Добавление выполнено успешно!")
