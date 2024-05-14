@@ -38,8 +38,8 @@ cursor = connection.cursor()
 
 TOKEN = os.getenv('TOKEN')
 
-count1 = 2
-count2 = 2
+count1 = 1
+count2 = 1
 # Подключаем логирование
 logging.basicConfig(
     filename='logfile.txt', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -85,16 +85,17 @@ def find_email(update: Update, context):
     return 'SAVE EMAIL'
 
 def save_email(update: Update,context):
+    global count1
     email = context.user_data['email']
     if(update.message.text == 'Y'):
         try:
             for x in email:
-                cursor.execute("INSERT INTO email(id, email) VALUES ("+str(count1)+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO email(id, email) VALUES ("+count1+",'"+str(x)+"');")
             connection.commit()
             count1+=1
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
-            update.message.reply_text("ERROR WITH DATABASE!"+str(error))
+            update.message.reply_text("ERROR WITH DATABASE! "+str(error))
             return ConversationHandler.END 
     else:
         update.message.reply_text("Хорошо, двигаемся дальше")
@@ -117,16 +118,17 @@ def find_phone_number(update: Update, context):
     return 'SAVE PHONE NUMBERS'
 
 def save_phone_numbers(update: Update,context):
+    global count2
     phoneNumberList = context.user_data['phone_numbers']
     if(update.message.text == 'Y'):
         try:
             for x in phoneNumberList:
-                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+str(count2)+",'"+str(x)+"');")
+                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+count2+",'"+str(x)+"');")
             connection.commit()
             count2+=1
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
-            update.message.reply_text("ERROR WITH DATABASE!")
+            update.message.reply_text("ERROR WITH DATABASE! "+str(error))
             return ConversationHandler.END 
     else:
         update.message.reply_text("Хорошо, двигаемся дальше")
@@ -242,7 +244,10 @@ def get_repl_logs(update: Update, context):
     update.message.reply_text(print_info(stdout,stderr))
 
 def get_emails(update: Update, context):
-    cursor.execute("SELECT * FROM email;")
+    try:
+        cursor.execute("SELECT * FROM email;")
+    except (Exception, Error) as error:
+        update.message.reply_text("ERROR "+str(error))
     data = cursor.fetchall()
     output=''
     for x in data:
@@ -250,7 +255,10 @@ def get_emails(update: Update, context):
     update.message.reply_text(output)
 
 def get_phone_numbers(update: Update, context):
-    cursor.execute("SELECT * FROM phone_number;")
+    try:
+        cursor.execute("SELECT * FROM phone_number;")
+    except (Exception, Error) as error:
+        update.message.reply_text("ERROR "+str(error))
     data = cursor.fetchall()
     output=''
     for x in data:
