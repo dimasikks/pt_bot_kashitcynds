@@ -38,9 +38,8 @@ cursor = connection.cursor()
 
 TOKEN = os.getenv('TOKEN')
 
-count1 = 2
-count2 = 2
-
+count1 = 1
+count2 = 1
 # Подключаем логирование
 logging.basicConfig(
     filename='logfile.txt', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -90,9 +89,9 @@ def save_email(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in email:
-                cursor.execute("INSERT INTO email(id, email) VALUES (count1, '"+str(x)+"');")
+                cursor.execute("INSERT INTO email(id, email) VALUES ("+count1+",'"+str(x)+"');")
             connection.commit()
-	    count1+=1
+            count1+=1
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
             update.message.reply_text("ERROR WITH DATABASE!")
@@ -122,9 +121,9 @@ def save_phone_numbers(update: Update,context):
     if(update.message.text == 'Y'):
         try:
             for x in phoneNumberList:
-                cursor.execute("INSERT INTO phone_number(id,phone_number) VALUES (count2, '"+str(x)+"');")
+                cursor.execute("INSERT INTO phone_number(id, phone_number) VALUES ("+count2+",'"+str(x)+"');")
             connection.commit()
-            count2+=1		
+            count2+=1
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
             update.message.reply_text("ERROR WITH DATABASE!")
