@@ -8,7 +8,10 @@ BEGIN
 END $$;
 ALTER USER replacepostgresuser WITH PASSWORD 'replacepostgrespassword';
 \c replacedbname;
+DROP DATABASE IF EXISTS base_1;
+CREATE DATABASE base_1;
+\c base_1;
 CREATE TABLE IF NOT EXISTS email(id INT PRIMARY KEY, email VARCHAR(255) NOT NULL);
 CREATE TABLE IF NOT EXISTS phone_number(id INT PRIMARY KEY, phone_number VARCHAR(255) NOT NULL);
-INSERT INTO email(email) VALUES('optipro38@gmail.com');
-INSERT INTO phone_number(phone_number) VALUES('89877585983');
+INSERT INTO email(id,email) VALUES(1,'optipro38@gmail.com');
+INSERT INTO phone_number(id,phone_number) VALUES(1,'89877585983');
