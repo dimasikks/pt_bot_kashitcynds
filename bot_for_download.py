@@ -91,7 +91,7 @@ def save_email(update: Update,context):
             connection.commit()
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
-            update.message.reply_text("ERROR WITH DATABASE!", error)
+            update.message.reply_text("ERROR WITH DATABASE!")
             return ConversationHandler.END 
     else:
         update.message.reply_text("Хорошо, двигаемся дальше")
@@ -122,7 +122,7 @@ def save_phone_numbers(update: Update,context):
             connection.commit()
             update.message.reply_text("Добавление выполнено успешно!")
         except (Exception, Error) as error:
-            update.message.reply_text("ERROR WITH DATABASE!", error)
+            update.message.reply_text("ERROR WITH DATABASE!")
             return ConversationHandler.END 
     else:
         update.message.reply_text("Хорошо, двигаемся дальше")
