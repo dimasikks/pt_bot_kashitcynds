@@ -1,0 +1,137 @@
+- name: FOR ALL HOSTS
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: APT INSTALL POSTGRES
+      package: 
+        name: postgresql
+        state: present
+    - name: APT INSTALL PSYCOPG2
+      package: 
+        name: postgresql-contrib
+        state: present
+    - name: INSTALL LIBPQ-DEV
+      package:
+        name: libpq-dev
+        state: present
+
+- name: DB
+  hosts: host01
+  gather_facts: false
+  tasks:
+    - name: INSTALL GIT FOR 1-T MACHINE
+      package:
+        name: git
+        state: present
+    - name: COPY
+      copy:
+        src: "{{ hostvars[inventory_hostname]['dir'] }}/init.sql"
+        dest: /tmp/init.sql
+        mode: '0644'
+    - name: CHOWN
+      command: chown postgres:postgres /tmp/init.sql
+    - name: replacedb
+      replace:
+        path: /tmp/init.sql
+        regexp: "replacedbname"
+        replace: "{{ hostvars[inventory_hostname]['DB_DATABASE'] }}"
+    - name: replaceuser
+      replace:
+        path: /tmp/init.sql
+        regexp: "replacerepluser"
+        replace: "{{ hostvars[inventory_hostname]['DB_REPL_USER'] }}"
+    - name: replacepassword
+      replace:
+        path: /tmp/init.sql
+        regexp: "replacereplpassword"
+        replace: "{{ hostvars[inventory_hostname]['DB_REPL_PASSWORD'] }}"
+    - name: replacepostgresuser
+      replace:
+        path: /tmp/init.sql
+        regexp: "replacepostgresuser"
+        replace: "{{ hostvars[inventory_hostname]['DB_USER'] }}"
+    - name: replacepostgrespassword
+      replace:
+        path: /tmp/init.sql
+        regexp: "replacepostgrespassword"
+        replace: "{{ hostvars[inventory_hostname]['DB_PASSWORD'] }}"
+    - name: RESTART DB
+      service:
+        name: postgresql
+        state: restarted
+    - name: LOADING DEFAULT TABLES ETC
+      command: psql -a -f /tmp/init.sql
+      become: true
+      become_user: postgres
+
+- name: DB_CONFIG
+  hosts: host01
+  gather_facts: false
+  tasks:
+    - name: ADD TO CONFIGURATION FILE
+      blockinfile:
+        path: "/etc/postgresql/{{ hostvars[inventory_hostname]['POSTGRES_VERSION'] }}/main/postgresql.conf"
+        block: |
+          listen_addresses = '*'
+          wal_level=replica
+          hot_standby=on
+          max_wal_senders=10
+          max_replication_slots=10
+          hot_standby_feedback=on
+          log_replication_commands=on
+    - name: PG_HBA CONFIGURATION
+      blockinfile:
+        path: "/etc/postgresql/{{ hostvars[inventory_hostname]['POSTGRES_VERSION'] }}/main/pg_hba.conf"
+        block: | 
+          host replication all {{ hostvars[inventory_hostname]['ansible_host'] }}/24 scram-sha-256
+          host all all {{ hostvars[inventory_hostname]['ansible_host'] }}/32 trust
+    - name: RESTART DB
+      service:
+        name: postgresql
+        state: restarted
+      
+- name: DB_REPL
+  hosts: host02
+  gather_facts: false
+  tasks:
+    - name: REMOVE
+      command: rm -rf /var/lib/postgresql/{{ hostvars[inventory_hostname]['POSTGRES_VERSION'] }}/
+    - name: ADD DB TO DB_REPL
+      command: pg_basebackup -h {{ hostvars[inventory_hostname]['DB_HOST'] }} -D /var/lib/postgresql/{{ hostvars[inventory_hostname]['POSTGRES_VERSION'] }}/main/ -U {{ hostvars[inventory_hostname]['DB_REPL_USER'] }} -vP -w
+      environment: 
+        PGPASSWORD: "{{ hostvars[inventory_hostname]['DB_REPL_PASSWORD'] }}"
+    - name: CHOWN
+      command: chown -R postgres:postgres /var/lib/postgresql/
+    - name: RESTART DB
+      service:
+        name: postgresql
+        state: restarted
+
+- name: TG_BOT
+  hosts: host01
+  gather_facts: false
+  tasks:
+    - name: MKDIR
+      command: mkdir -p "{{ hostvars[inventory_hostname]['dir'] }}/start"
+    - name: GIT CLONE
+      git:
+        repo: https://github.com/dimasikks/pt_bot_kashitcynds.git
+        dest: "{{ hostvars[inventory_hostname]['dir'] }}/start"
+        version: main
+    - name: INSTALLATION
+      command: pip install -r "{{ hostvars[inventory_hostname]['dir'] }}/start/installation.txt" --break-system-packages
+    - name: STARTING BOT
+      command: python3 "{{ hostvars[inventory_hostname]['dir'] }}/start/bot_for_download.py"
+      environment:
+        TOKEN: "{{ hostvars[inventory_hostname]['TOKEN'] }}"
+        RM_HOST: "{{ hostvars[inventory_hostname]['RM_HOST'] }}"
+        RM_PORT: "{{ hostvars[inventory_hostname]['RM_PORT'] }}"
+        RM_USER: "{{ hostvars[inventory_hostname]['RM_USER'] }}"
+        RM_PASSWORD: "{{ hostvars[inventory_hostname]['RM_PASSWORD'] }}"
+        DB_HOST: "{{ hostvars[inventory_hostname]['DB_HOST'] }}"
+        DB_PORT: "{{ hostvars[inventory_hostname]['DB_PORT'] }}"
+        DB_USER: "{{ hostvars[inventory_hostname]['DB_USER'] }}"
+        DB_PASSWORD: "{{ hostvars[inventory_hostname]['DB_PASSWORD'] }}"
+        DB_DATABASE: "{{ hostvars[inventory_hostname]['DB_DATABASE'] }}"
+        PG_VERSION: "{{ hostvars[inventory_hostname]['POSTGRES_VERSION'] }}"
+ 
